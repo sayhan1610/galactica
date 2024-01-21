@@ -17,7 +17,7 @@ from akinator import (
 bot = commands.Bot(command_prefix="g.", intents=discord.Intents.all())
 import os
 
-token = "ODAzMTMxODY2MTM5OTgzODky.GDV5Oa.tnPm6P59XGkJYMUcaRdbanJwC2cO58ZgugAd7k"
+token = os.environ['bot_token']
 start_time = datetime.utcnow()
 
 @bot.event
