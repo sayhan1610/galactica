@@ -878,12 +878,6 @@ async def confess(
 
 
 
-# Chat
-@bot.tree.command(name="chat", description="Temporarily unavailable")
-async def chat(interaction: discord.Interaction):
-  await interaction.response.send_message(
-    f"This function is temporarily unavailable.", ephemeral=True)
-
 
 # Help
 @bot.tree.command(name="help",
