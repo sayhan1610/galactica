@@ -23,6 +23,12 @@ BARD_TOKEN = os.environ['bard_token']
 bard = BardAsync(token=BARD_TOKEN)
 start_time = datetime.utcnow()
 
+# Keep Alive
+from keepalive import keep_alive
+
+keep_alive()
+
+# Bot
 @bot.event
 async def on_ready():
   server_id = 740830080451739659
@@ -64,10 +70,7 @@ async def on_ready():
     await asyncio.sleep(30)  # sleep for 30 seconds
 
 
-# Keep Alive
-from keepalive import keep_alive
 
-keep_alive()
 
 # Bard
 @bot.tree.command(name="reset", description="Reset chat context")

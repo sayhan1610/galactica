@@ -6,7 +6,7 @@ app = Flask('')
 
 @app.route('/')
 def main():
-    return "Galactica: Hi there, thanks for the wakeup call. Imma hang up now."
+    return "Ping Pong Bot is online!"
 
 
 def run():
