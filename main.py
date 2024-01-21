@@ -81,8 +81,8 @@ async def reset(interaction: discord.Interaction):
     await interaction.followup.send("Chat context successfully reset.")
     return
     
-@bot.tree.command(name="chat", description="AI Chatbot Powered by Google's Bard")
-async def chat(interaction: discord.Interaction, prompt: str, image: discord.Attachment = None):
+@bot.tree.command(name="ask", description="AI Chatbot Powered by Google's Bard")
+async def ask(interaction: discord.Interaction, prompt: str, image: discord.Attachment = None):
     await interaction.response.defer()
     if image is not None:
         if not image.content_type.startswith('image/'):
