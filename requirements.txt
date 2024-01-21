@@ -1,0 +1,8 @@
+discord
+discord.py
+datetime
+typing
+asyncio
+akinator.py
+requests
+flask
