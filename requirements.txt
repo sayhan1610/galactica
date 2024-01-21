@@ -6,3 +6,4 @@ asyncio
 akinator.py
 requests
 flask
+bardapi==0.1.33
