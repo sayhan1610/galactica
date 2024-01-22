@@ -114,27 +114,23 @@ async def generate_response(prompt):
                     response["content"] += f"\n{image}"
         return response
     
+
+
 @bot.event
 async def on_message(message):
-    config = read_config()
-
-    # Check if the channel ID is 1080917858583851100
     if message.channel.id != 1080917858583851100:
         return
-
+    config = read_config()
     if config.getboolean("SETTINGS", "reply_all"):
         if message.author == bot.user:
             return
-
         async with message.channel.typing():
             response = await generate_response(message.content)
-
             if len(response['content']) > 2000:
                 embed = discord.Embed(title="Response", description=response['content'], color=0xf1c40f)
                 await message.channel.send(embed=embed)
             else:
                 await message.channel.send(response['content'])
-
     
 def read_config():
     config = configparser.ConfigParser()
