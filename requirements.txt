@@ -6,4 +6,5 @@ asyncio
 akinator.py
 requests
 flask
+python-dotenv
 bardapi==0.1.33

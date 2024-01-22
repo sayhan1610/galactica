@@ -17,6 +17,8 @@ from bardapi import BardAsync
 import configparser 
 bot = commands.Bot(command_prefix="g.", intents=discord.Intents.all())
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 token = os.environ['bot_token']
 BARD_TOKEN = os.environ['bard_token']
