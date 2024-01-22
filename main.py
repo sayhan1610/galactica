@@ -86,33 +86,24 @@ async def reset(interaction: discord.Interaction):
 @bot.tree.command(name="ask", description="AI responses Powered by Google's Bard")
 async def ask(interaction: discord.Interaction, prompt: str, image: discord.Attachment = None):
     await interaction.response.defer()
-
-    # Format the prompt
-    formatted_prompt = f"{interaction.user.name} prmpted __*{prompt}*__"
-
     if image is not None:
         if not image.content_type.startswith('image/'):
             await interaction.response.send_message("File must be an image")
             return
-
-        response = await bard.ask_about_image(formatted_prompt, await image.read())
-
+        response = await bard.ask_about_image(prompt, await image.read())
         if len(response['content']) > 2000:
             embed = discord.Embed(title="Response", description=response['content'], color=0xf1c40f)
             await interaction.followup.send(embed=embed)
         else:
             await interaction.followup.send(response['content'])
-        return
-
-    response = await generate_response(formatted_prompt)
-
+            return
+    response = await generate_response(prompt) 
     if len(response['content']) > 2000:
         embed = discord.Embed(title="Response", description=response['content'], color=0xf1c40f)
         await interaction.followup.send(embed=embed)
     else:
         await interaction.followup.send(response['content'])
     return
-
 
 async def generate_response(prompt):
     response = await bard.get_answer(prompt)
