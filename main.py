@@ -77,10 +77,10 @@ async def on_ready():
 # Bard
 @bot.tree.command(name="reset", description="Reset chat context")
 async def reset(interaction: discord.Interaction):
-    await interaction.response.defer()
+    await interaction.response.defer(ephemeral=True)
     global bard
     bard = BardAsync(token=BARD_TOKEN)
-    await interaction.followup.send("Chat context successfully reset.")
+    await interaction.followup.send("Chat context successfully reset.", ephemeral=True)
     return
     
 @bot.tree.command(name="ask", description="AI responses powered by Google's Bard")
