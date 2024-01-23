@@ -77,13 +77,13 @@ async def on_ready():
 # Bard
 @bot.tree.command(name="reset", description="Reset chat context")
 async def reset(interaction: discord.Interaction):
-    await interaction.response.defer(ephemeral=True)
+    await interaction.response.defer()
     global bard
     bard = BardAsync(token=BARD_TOKEN)
-    await interaction.followup.send("Chat context successfully reset.", ephemeral=True)
+    await interaction.followup.send("Chat context successfully reset.")
     return
     
-@bot.tree.command(name="ask", description="AI responses Powered by Google's Bard")
+@bot.tree.command(name="ask", description="AI responses powered by Google's Bard")
 async def ask(interaction: discord.Interaction, prompt: str, image: discord.Attachment = None):
     await interaction.response.defer()
     if image is not None:
@@ -115,8 +115,38 @@ async def generate_response(prompt):
                 for image in images:
                     response["content"] += f"\n{image}"
         return response
+    
+
+@bot.event
+async def on_message(message):
+    if isinstance(message.channel, discord.TextChannel) and message.channel.name == "ai-chat":
+        if message.author == bot.user:
+            return
+        async with message.channel.typing():
+            response = await generate_response(message.content)
+            if len(response['content']) > 2000:
+                embed = discord.Embed(title="Response", description=response['content'], color=0xf1c40f)
+                await message.channel.send(embed=embed)
+            else:
+                await message.channel.send(response['content'])
+    # DM Listener
+    elif isinstance(message.channel, discord.DMChannel) and message.author != bot.user:
+        # Copy the message and sender's name
+        sender = message.author
+        content = message.content
+        channel_name = sender.name + "#" + sender.discriminator
+        message_text = f"__`{channel_name}:`__ {content}"
+
+        # DM the copied message to the bot owner
+        owner = await bot.fetch_user(676367462270238730)
+        await owner.send(message_text)
+
+    await bot.process_commands(message)
 
 
+
+
+    
 def read_config():
     config = configparser.ConfigParser()
     config.read("config.ini")
@@ -380,9 +410,14 @@ async def dm(interaction: discord.Interaction, user: discord.Member,
             # Replace "\\n" with "\n" in the message
             message = message.replace("\\n", "\n")
 
-            print(
-                f"[{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')}] - [{interaction.channel}] -  {interaction.user.name} used /dm"
-            )
+            # Logging the command usage
+            log_channel_id = 1152550043333689454
+            log_channel = bot.get_channel(log_channel_id)
+            if log_channel:
+                await log_channel.send(
+                    f"__`[{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC]`__ - **{interaction.user.name}** used `/dm` in <#{interaction.channel_id}> to send a message to {user.display_name}"
+                )
+
             await user.send(message)
             await interaction.response.send_message(
                 f"Sent a message to {user.display_name}! __**The following was sent**__: {message}",
@@ -396,32 +431,6 @@ async def dm(interaction: discord.Interaction, user: discord.Member,
         await interaction.response.send_message(
             f"I only listen to certain peeps for that command!", ephemeral=True)
 
-
-
-# Listen for DMs
-@bot.event
-async def on_message(message):
-  if isinstance(message.channel,
-                discord.DMChannel) and message.author != bot.user:
-    # Copy the message and sender's name
-    sender = message.author
-    content = message.content
-    channel_name = sender.name + "#" + sender.discriminator
-    message_text = f"__`{channel_name}:`__ {content}"
-
-    # DM the copied message to the bot owner
-    owner = await bot.fetch_user(676367462270238730)
-    await owner.send(message_text)
-
-  await bot.process_commands(message)
-
-
-
-
-
-
-
-  
 
 
 # Law
@@ -889,7 +898,7 @@ async def help(interaction: discord.Interaction):
   embed = discord.Embed(
     title="About Galactica",
     description=
-    "Hi there! I'm Galactica, one of the official bots of _Galaxy's Edge_ <a:HyperYay:1003182174129889290>.\n\n__**Try out my  commands:**__\n\n</help:1082383548197109912>: `Views this command`\n\n</meme:1080898269951049771>:`Sends a random meme`\n\n</confess:1080898269951049772>: `Make a confession in` <#1080435136614629436>\n\n</ping:1099752021877346437>: `Get the bot ping in ms`\n\n</chat:1091468756988985345> _(temporarily unavailable)_: `Chat with AI features of the bot. Suggested to use in` <#1080917858583851100>\n\n</joke:1080898269951049770>: `Sends a random joke. Can be harsh sometimes.`\n\n</law:1086637608198754304>: `Learn about a law from the 48 Laws of Power`\n\n</suggest_qotd:1091455610584838266>: `Suggest a question for Question of the Day`\n\n</suggest_sotd:1091462046857560074> `Suggest a song for Song of the Day`\n\n</shower_thoughts:1093458053250162740>: `Intrigue your thoughts. Use at your own risk!`\n\n</akinator:1118151610032472126>: `Play a Game of Akinator (Still Under Development)`",
+    "Hi there! I'm Galactica, one of the official bots of _Galaxy's Edge_ <a:HyperYay:1003182174129889290>.\n\n__**Try out my  commands:**__\n\n</help:1082383548197109912>: `Views this command`\n\n</meme:1080898269951049771>:`Sends a random meme`\n\n</confess:1080898269951049772>: `Make a confession in` <#1080435136614629436>\n\n</ping:1099752021877346437>: `Get the bot ping in ms`\n\n</ask:1199304720028803122>: `Chat with AI features of the bot Powered by Bard`\n\n</joke:1080898269951049770>: `Sends a random joke. Can be harsh sometimes.`\n\n</law:1086637608198754304>: `Learn about a law from the 48 Laws of Power`\n\n</suggest_qotd:1091455610584838266>: `Suggest a question for Question of the Day`\n\n</suggest_sotd:1091462046857560074> `Suggest a song for Song of the Day`\n\n</shower_thoughts:1093458053250162740>: `Intrigue your thoughts. Use at your own risk!`\n\n</akinator:1118151610032472126>: `Play a Game of Akinator`",
     url="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     color=random.randint(0, 0xFFFFFF),
     timestamp=datetime.utcnow())
