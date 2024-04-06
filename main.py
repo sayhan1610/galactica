@@ -344,7 +344,18 @@ async def say(interaction: discord.Interaction, thing_to_say: str):
 
 
 
-
+# Shower thoughts
+@bot.tree.command(
+  name="shower_thoughts",
+  description="If you love yourself, don't, just don't. I'm being serious!")
+async def shower_thoughts(interaction: discord.Interaction):
+    with open("shower_thoughts.json", "r") as file:
+        shower_thoughts_data = json.load(file)
+    
+    bot_response = random.choice(shower_thoughts_data["quotes"])
+    await interaction.response.send_message(bot_response)
+    
+    
 # confess
 
 
