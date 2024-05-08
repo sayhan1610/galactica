@@ -52,7 +52,7 @@ async def on_ready():
     activity = discord.Activity(type=discord.ActivityType.watching,
                                 name=activity_text)
     await bot.change_presence(status=discord.Status.idle, activity=activity)
-    await asyncio.sleep(30)  # sleep for 30 seconds
+    await asyncio.sleep(600)  # sleep for x seconds
 
     activity_text = f" over {server.member_count} explorers"
     activity = discord.Activity(type=discord.ActivityType.watching,
