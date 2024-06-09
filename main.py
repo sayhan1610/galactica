@@ -309,7 +309,7 @@ async def dm(interaction: discord.Interaction, user: discord.Member,
             log_channel = bot.get_channel(log_channel_id)
             if log_channel:
                 await log_channel.send(
-                    f"__`[{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC]`__ - **{interaction.user.name}** used `/dm` in <#{interaction.channel_id}> to send a message to {user.display_name}"
+                    f"__`[{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC]`__ - **{interaction.user.name}** used `/dm` in <#{interaction.channel_id}> to send a message to **{user.display_name}**\n__**Message:**__ {message}"
                 )
 
             await user.send(message)
@@ -327,7 +327,7 @@ async def dm(interaction: discord.Interaction, user: discord.Member,
 
 
 
-# say
+# Say
 @bot.tree.command(
   name="say",
   description="The bot won't listen unless you are cool, don't try XD")
@@ -337,21 +337,14 @@ async def say(interaction: discord.Interaction, thing_to_say: str):
     # Replace "\n" with newline characters
     thing_to_say = thing_to_say.replace("\\n", "\n")
     
-    authorized_user = [
-        676367462270238730, 1071057018183499861, 740509592701763604,
-        738786980237934613, 769553775941386252, 466263032218124319,
-        313739229962436608
-    ]
-    if interaction.user.id in authorized_user:
-        await interaction.channel.send(thing_to_say)
-        await interaction.response.send_message("Sent!", ephemeral=True)
-        
-        log_channel_id = 1152550043333689454
-        log_channel = bot.get_channel(log_channel_id)
-        if log_channel:
-            await log_channel.send(f"__`[{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC]`__ - **{interaction.user.name}** used </say:1080898269951049769> in <#{interaction.channel_id}>")
-    else:
-        await interaction.response.send_message("I only listen to certain people for that command!", ephemeral=True)
+    await interaction.channel.send(thing_to_say)
+    await interaction.response.send_message("Sent!", ephemeral=True)
+    
+    log_channel_id = 1152550043333689454
+    log_channel = bot.get_channel(log_channel_id)
+    if log_channel:
+        await log_channel.send(f"__`[{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC]`__ - **{interaction.user.name}** used </say:1080898269951049769> in <#{interaction.channel_id}>")
+
 
 
 
