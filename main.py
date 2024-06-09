@@ -100,7 +100,7 @@ async def help_command(interaction: discord.Interaction):
     help_text = ""
 
     for command in commands_list:
-        help_text += f"/{command.name} - {command.description}\n"
+        help_text += f"</{command.name}:{command.id}> - `{command.description}`\n"
 
     await interaction.response.send_message(help_text, ephemeral=True)
 
