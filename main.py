@@ -93,6 +93,16 @@ async def on_message(message):
 
     await bot.process_commands(message)
 
+# Help
+@bot.tree.command(name="help", description="List all commands and their descriptions.")
+async def help_command(interaction: discord.Interaction):
+    commands_list = bot.tree.get_commands()
+    help_text = ""
+
+    for command in commands_list:
+        help_text += f"/{command.name} - {command.description}\n"
+
+    await interaction.response.send_message(help_text, ephemeral=True)
 
 
 # Akinator
