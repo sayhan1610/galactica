@@ -7,8 +7,6 @@ import random
 from datetime import datetime, timedelta
 from typing import Optional
 import asyncio
-from akinator.async_aki import Akinator
-from akinator.exceptions import CantGoBackAnyFurther, InvalidAnswer
 from akinator import (
     CantGoBackAnyFurther,
     InvalidAnswer,
