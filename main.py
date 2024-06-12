@@ -104,44 +104,34 @@ async def help_command(interaction: discord.Interaction):
 
     await interaction.response.send_message(help_text, ephemeral=True)
 
+
 # Akinator
 with open('akinator_avatar.png', 'rb') as file:
     avatar_bytes = file.read()
-
+  
 @bot.tree.command(name="akinator", description="Play the Akinator game. I'll try to guess who/what you are thinking of!")
 @app_commands.choices(theme=[
     app_commands.Choice(name="Characters", value="characters"),
     app_commands.Choice(name="Objects", value="objects"),
-    app_commands.Choice(name="Animals", value="animals"),
-])
+  app_commands.Choice(name="Animals", value="animals"),
+    ])
 @app_commands.describe(
-    theme="Choose from: Characters, Objects or Animals. (Set to Characters by default)")
+  theme="Choose from: Characters, Objects or Animals. (Set to Characters by default)")
 async def akinator_game(interaction: discord.Interaction, theme: Optional[str] = "characters"):
-    await interaction.response.defer(ephemeral=True)  # Defers the interaction to give more time
-    
     theme = theme.lower()
     
     if theme not in ["characters", "objects", "animals"]:
-        await interaction.followup.send("Invalid theme. Please choose from: Characters, Objects or Animals.", ephemeral=True)
+        await interaction.response.send_message("Invalid theme. Please choose from: Characters, Objects or Animals.", ephemeral=True)
         return
     
-    try:
-        theme = Theme.from_str(theme)
-    except Exception as e:
-        await interaction.followup.send(f"Error with theme: {str(e)}", ephemeral=True)
-        return
+    theme = Theme.from_str(theme)
     
-    try:
-        aki = Akinator(child_mode=False, theme=theme)
-        first_question = await aki.start_game()
-    except Exception as e:
-        await interaction.followup.send(f"Failed to start the game: {str(e)}", ephemeral=True)
-        return
-
-    await interaction.followup.send("The game will begin shortly <a:star3d:1112469398402383992>. Respond with __`yes (y)`__, __`no (n)`__, __`probably`__, __`probably not`__, __`i don't know (idk)`__ or __`back`__.", ephemeral=True)
+    await interaction.response.send_message("The game will begin shortly <a:star3d:1112469398402383992>. Respond with __`yes (y)`__, __`no (n)`__, __`probably`__, __`probably not`__, __`i don't know (idk)`__ or __`back`__.", ephemeral=True)
+    aki = Akinator(child_mode=False, theme=theme)
+    first_question = aki.start_game()
 
     def check(message):
-        return message.author == interaction.user and message.channel == interaction.channel
+        return message.author == interaction.user
 
     try:
         akchannel_id = interaction.channel_id
@@ -182,7 +172,6 @@ async def akinator_game(interaction: discord.Interaction, theme: Optional[str] =
     except asyncio.TimeoutError:
         await interaction.followup.send("Timeout: The game has ended.", ephemeral=True)
         await webhook.delete()
-
 
 
 
