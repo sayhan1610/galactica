@@ -31,6 +31,14 @@ from keepalive import keep_alive
 
 keep_alive()
 
+# game uptime
+gcurrent_time = datetime.utcnow()
+guptime = gcurrent_time - start_time
+
+    # Calculate hours and minutes for uptime
+ghours = guptime // timedelta(ghours=1)
+gminutes = (guptime // timedelta(gminutes=1)) % 60
+
 # Bot
 @bot.event
 async def on_ready():
@@ -48,29 +56,31 @@ async def on_ready():
     print(e)
 
   while True:
+    sleep_timer = 600
     activity_text = " out for /help"
     activity = discord.Activity(type=discord.ActivityType.watching,
                                 name=activity_text)
     await bot.change_presence(status=discord.Status.idle, activity=activity)
-    await asyncio.sleep(600)  # sleep for x seconds
+    await asyncio.sleep(sleep_timer)  # sleep for x seconds
 
     activity_text = f" over {server.member_count} explorers"
     activity = discord.Activity(type=discord.ActivityType.watching,
                                 name=activity_text)
     await bot.change_presence(status=discord.Status.idle, activity=activity)
-    await asyncio.sleep(30)  # sleep for 30 seconds
+    await asyncio.sleep(sleep_timer)  # sleep for x seconds
 
-    activity_text = "your confessions"
+    activity_text = "your confessions | /confess"
     activity = discord.Activity(type=discord.ActivityType.listening,
                                 name=activity_text)
     await bot.change_presence(status=discord.Status.idle, activity=activity)
-    await asyncio.sleep(30)  # sleep for 30 seconds
-
-    activity_text = "Galaxy's Summer Chess Tournament"
-    activity = discord.Activity(type=discord.ActivityType.competing,
+    await asyncio.sleep(sleep_timer)  # sleep for x seconds
+    
+    activity_text = f"for {ghours} hours and {gminutes} minutes"
+    activity = discord.Activity(type=discord.ActivityType.playing,
                                 name=activity_text)
     await bot.change_presence(status=discord.Status.idle, activity=activity)
-    await asyncio.sleep(30)  # sleep for 30 seconds
+    await asyncio.sleep(sleep_timer)  # sleep for x seconds
+
 
 
 
