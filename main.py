@@ -36,8 +36,8 @@ gcurrent_time = datetime.utcnow()
 guptime = gcurrent_time - start_time
 
     # Calculate hours and minutes for uptime
-ghours = guptime // timedelta(ghours=1)
-gminutes = (guptime // timedelta(gminutes=1)) % 60
+ghours = guptime // timedelta(hours=1)
+gminutes = (guptime // timedelta(minutes=1)) % 60
 
 # Bot
 @bot.event
