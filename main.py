@@ -32,12 +32,12 @@ from keepalive import keep_alive
 keep_alive()
 
 # game uptime
-gcurrent_time = datetime.utcnow()
-guptime = gcurrent_time - start_time
+current_time = datetime.utcnow()
+uptime = current_time - start_time
 
     # Calculate hours and minutes for uptime
-ghours = guptime // timedelta(hours=1)
-gminutes = (guptime // timedelta(minutes=1)) % 60
+hours = uptime // timedelta(hours=1)
+minutes = (uptime // timedelta(minutes=1)) % 60
 
 # Bot
 @bot.event
@@ -75,7 +75,7 @@ async def on_ready():
     await bot.change_presence(status=discord.Status.idle, activity=activity)
     await asyncio.sleep(sleep_timer)  # sleep for x seconds
     
-    activity_text = f"for {ghours} hours and {gminutes} minutes"
+    activity_text = f"for {hours} hours and {minutes} minutes"
     activity = discord.Activity(type=discord.ActivityType.playing,
                                 name=activity_text)
     await bot.change_presence(status=discord.Status.idle, activity=activity)
