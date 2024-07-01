@@ -34,13 +34,6 @@ keep_alive()
 # Bot
 @bot.event
 async def on_ready():
-  # game uptime
-  current_time = datetime.utcnow()
-  uptime = current_time - start_time
-
-  # Calculate hours and minutes for uptime
-  hours = uptime // timedelta(hours=1)
-  minutes = (uptime // timedelta(minutes=1)) % 60
   server_id = 740830080451739659
   server = bot.get_guild(server_id)
   activity_text = f" over {server.member_count} explorers"
@@ -55,6 +48,13 @@ async def on_ready():
     print(e)
 
   while True:
+    # game uptime
+    current_time = datetime.utcnow()
+    uptime = current_time - start_time
+
+    # Calculate hours and minutes for uptime
+    hours = uptime // timedelta(hours=1)
+    minutes = (uptime // timedelta(minutes=1)) % 60
     sleep_timer = 600
     activity_text = " out for /help"
     activity = discord.Activity(type=discord.ActivityType.watching,
