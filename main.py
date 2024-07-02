@@ -104,7 +104,7 @@ async def on_message(message):
     await bot.process_commands(message)
 
 # MatchMyTaste
-@bot.command(name="matchmytaste", description="Find artists/tracks similar to one provided or get top tracks of the month.")
+@bot.tree.command(name="matchmytaste", description="Find artists/tracks similar to one provided or get top tracks of the month.")
 async def matchmytaste(interaction: discord.Interaction, artist_name: str = None, track_name: str = None):
     base_url = "https://matchmytaste.onrender.com"
 
