@@ -223,18 +223,19 @@ async def ping(interaction: discord.Interaction):
 async def matchmytaste(interaction: discord.Interaction, artist_name: str = None, track_name: str = None):
     base_url = "https://matchmytaste.onrender.com"
 
-    if artist_name:
-        endpoint = "/search_artist"
-        query = { "query": artist_name }
-    elif track_name:
-        endpoint = "/search_track"
-        query = { "query": track_name }
-    else:
-        endpoint = "/top_tracks_of_month"
-        query = {}
-
     try:
-        response = requests.post(base_url + endpoint, json=query)
+        if artist_name:
+            endpoint = "/search_artist"
+            query = { "query": artist_name }
+            response = requests.post(base_url + endpoint, json=query)
+        elif track_name:
+            endpoint = "/search_track"
+            query = { "query": track_name }
+            response = requests.post(base_url + endpoint, json=query)
+        else:
+            endpoint = "/top_tracks_of_month"
+            response = requests.get(base_url + endpoint)
+
         response.raise_for_status()  # Raise an error for bad responses (e.g., 404)
 
         data = response.json()
