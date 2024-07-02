@@ -219,42 +219,73 @@ async def ping(interaction: discord.Interaction):
     f"The current ping is **{latency:.2f}** ms! <:jojos_tom:1071123688201662535>")
 
 # MatchMyTaste
+
+base_url = 'https://matchmytaste.onrender.com'  # Replace with your actual API base URL
+
+# Function to search for similar artists
+def search_artist(query):
+    endpoint = '/search_artist'
+    url = base_url + endpoint
+    payload = {'query': query}
+    try:
+        response = requests.post(url, json=payload)
+        response.raise_for_status()  # Raise an error for bad responses (e.g., 404)
+        return response.json()
+    except requests.RequestException as e:
+        print(f"Error searching artist: {e}")
+        return None
+
+# Function to search for similar tracks
+def search_track(query):
+    endpoint = '/search_track'
+    url = base_url + endpoint
+    payload = {'query': query}
+    try:
+        response = requests.post(url, json=payload)
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as e:
+        print(f"Error searching track: {e}")
+        return None
+
+# Function to fetch top tracks of the month
+def top_tracks_of_month():
+    endpoint = '/top_tracks_of_month'
+    url = base_url + endpoint
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as e:
+        print(f"Error fetching top tracks of the month: {e}")
+        return None
+
+# MatchMyTaste command
 @bot.tree.command(name="matchmytaste", description="Find artists/tracks similar to one provided or get top tracks of the month.")
 async def matchmytaste(interaction: discord.Interaction, artist_name: str = None, track_name: str = None):
-    base_url = "https://matchmytaste.onrender.com"
+    if artist_name:
+        results = search_artist(artist_name)
+    elif track_name:
+        results = search_track(track_name)
+    else:
+        results = top_tracks_of_month()
 
-    try:
-        if artist_name:
-            endpoint = "/search_artist"
-            query = { "query": artist_name }
-            response = requests.post(base_url + endpoint, json=query)
-        elif track_name:
-            endpoint = "/search_track"
-            query = { "query": track_name }
-            response = requests.post(base_url + endpoint, json=query)
-        else:
-            endpoint = "/top_tracks_of_month"
-            response = requests.get(base_url + endpoint)
+    if results is None:
+        await interaction.response.send_message("Error fetching data from API.", ephemeral=True)
+        return
 
-        response.raise_for_status()  # Raise an error for bad responses (e.g., 404)
+    if not results:
+        await interaction.response.send_message("No results found.", ephemeral=True)
+        return
 
-        data = response.json()
-        if data:
-            selected_items = random.sample(data, min(len(data), 10))
+    selected_items = random.sample(results, min(len(results), 10))
 
-            embed = discord.Embed(title="Match My Taste Results", color=0x1abc9c)  # Customize color as needed
-            for item in selected_items:
-                if "name" in item and "artists" in item and "spotify_url" in item:
-                    embed.add_field(name=item["name"], value=f"Artists: {', '.join(item['artists'])}\n[Spotify]({item['spotify_url']})", inline=False)
+    embed = discord.Embed(title="Match My Taste Results", color=0x1abc9c)  # Customize color as needed
+    for item in selected_items:
+        if "name" in item and "artists" in item and "spotify_url" in item:
+            embed.add_field(name=item["name"], value=f"Artists: {', '.join(item['artists'])}\n[Spotify]({item['spotify_url']})", inline=False)
 
-            await interaction.response.send_message(embed=embed, ephemeral=True)
-        else:
-            await interaction.response.send_message("No results found.", ephemeral=True)
-    except requests.RequestException as e:
-        await interaction.response.send_message(f"Error fetching data from API: {e}", ephemeral=True)
-
-
-
+    await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
 
