@@ -250,143 +250,41 @@ async def ping(interaction: discord.Interaction):
     content=
     f"The current ping is **{latency:.2f}** ms! <:jojos_tom:1071123688201662535>")
 
-# Uptime
+# MatchMyTaste
+@bot.tree.command(name="matchmytaste", description="Find artists/tracks similar to one provided or get top tracks of the month.")
+async def matchmytaste(interaction: discord.Interaction, artist_name: str = None, track_name: str = None):
+    base_url = "https://matchmytaste.onrender.com"
 
-@bot.tree.command(name="uptime", description="Check how long the bot has been running for!")
-async def uptime(interaction: discord.Interaction):
-    current_time = datetime.utcnow()
-    uptime = current_time - start_time
-
-    # Calculate hours and minutes for uptime
-    hours = uptime // timedelta(hours=1)
-    minutes = (uptime // timedelta(minutes=1)) % 60
-
-    # Format the bot start time as a Unix timestamp
-    start_timestamp = int(start_time.timestamp())
-    formatted_start_time = f"<t:{start_timestamp}>"
-
-    await interaction.response.send_message(f"Bot has been up for {hours} h {minutes} m.\nBot started on {formatted_start_time}", ephemeral=True)
-
-  
-
-
-# Suggest QOTD
-@bot.tree.command(name="suggest_qotd", description="Suggest a QOTD!")
-async def suggest_qotd(interaction: discord.Interaction, question: str):
-  channel = bot.get_channel(1095350025556594719)
-  embed = discord.Embed(title="QOTD Suggestion",
-                        description=f"**Question:** \n{question}")
-  embed.set_footer(
-    text=
-    f"Suggested by {interaction.user.name}")
-  embed.color = random.randint(0, 0xFFFFFF)
-  await channel.send(embed=embed)
-  await interaction.response.send_message(f"Suggestion sent to our staff!",
-                                          ephemeral=True)
-
-
-# Suggest SOTD
-@bot.tree.command(name="suggest_sotd", description="Suggest SOTD!")
-@app_commands.describe(
-  song_name="The name of the song",
-  artist_name="Name of the Artist(s)",
-  link_1="Spotify/YouTube link to make navigation easier",
-  link_2="An additional link to make navigation even easier (optional)",
-  comment="Add a comment if you wish to (optional)")
-async def suggest_sotd(interaction: discord.Interaction,
-                       song_name: str,
-                       artist_name: str,
-                       link_1: str,
-                       link_2: str = "",
-                       comment: str = ""):
-  # Check if link_1 and link_2 are valid links
-  link_regex = re.compile(r'https?://\S+')
-  if not link_regex.match(link_1):
-    return await interaction.response.send_message(
-      "Invalid link provided for Link 1. Mind using a real Spotify/YouTube link please?",
-      ephemeral=True)
-  if link_2 and not link_regex.match(link_2):
-    return await interaction.response.send_message(
-      "Invalid link provided for Link 2. Mind using a real Spotify/YouTube link please?",
-      ephemeral=True)
-
-  channel = bot.get_channel(800642003364347954)
-  embed = discord.Embed(title="SOTD Suggestion")
-  embed.add_field(name="Song Name", value=song_name, inline=True)
-  embed.add_field(name="Artist(s) Name", value=artist_name, inline=True)
-  embed.add_field(name="Link 1", value=link_1, inline=False)
-  if link_2:
-    embed.add_field(name="Link 2", value=link_2, inline=False)
-  if comment:
-    embed.add_field(name="Comment", value=comment, inline=False)
-  embed.set_footer(
-    text=
-    f"Suggested by {interaction.user.name}")
-  embed.color = random.randint(0, 0xFFFFFF)
-  await channel.send(embed=embed)
-  await interaction.response.send_message(f"Suggestion sent to our staff!",
-                                          ephemeral=True)
-
-
-# DM
-@bot.tree.command(
-    name="dm",
-    description="Send a direct message to a mentioned user with a custom message"
-)
-@commands.is_owner()
-@app_commands.describe(user="The user to send a message to",
-                       message="The message to send to the user")
-async def dm(interaction: discord.Interaction, user: discord.Member,
-             message: str):
-    authorized_user = [
-        676367462270238730, 1071057018183499861, 738786980237934613,
-        740509592701763604
-    ]
-    if interaction.user.id in authorized_user:
-        try:
-            # Replace "\\n" with "\n" in the message
-            message = message.replace("\\n", "\n")
-
-            # Logging the command usage
-            log_channel_id = 1152550043333689454
-            log_channel = bot.get_channel(log_channel_id)
-            if log_channel:
-                await log_channel.send(
-                    f"__`[{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC]`__ - **{interaction.user.name}** used `/dm` in <#{interaction.channel_id}> to send a message to **{user.display_name}**\n__**Message:**__ {message}"
-                )
-
-            await user.send(message)
-            await interaction.response.send_message(
-                f"Sent a message to {user.display_name}! __**The following was sent**__: {message}",
-                ephemeral=True)
-
-        except discord.Forbidden:
-            await interaction.response.send_message(
-                f"I couldn't send a message to {user.display_name}, they may have blocked me or disabled DMs",
-                ephemeral=True)
+    if artist_name:
+        endpoint = "/search_artist"
+        query = { "query": artist_name }
+    elif track_name:
+        endpoint = "/search_track"
+        query = { "query": track_name }
     else:
-        await interaction.response.send_message(
-            f"I only listen to certain peeps for that command!", ephemeral=True)
+        endpoint = "/top_tracks_of_month"
+        query = {}
+
+    try:
+        response = requests.post(base_url + endpoint, json=query)
+        response.raise_for_status()  # Raise an error for bad responses (e.g., 404)
+
+        data = response.json()
+        if data:
+            selected_items = random.sample(data, min(len(data), 10))
+
+            embed = discord.Embed(title="Match My Taste Results", color=0x1abc9c)  # Customize color as needed
+            for item in selected_items:
+                if "name" in item and "artists" in item and "spotify_url" in item:
+                    embed.add_field(name=item["name"], value=f"Artists: {', '.join(item['artists'])}\n[Spotify]({item['spotify_url']})", inline=False)
+
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+        else:
+            await interaction.response.send_message("No results found.", ephemeral=True)
+    except requests.RequestException as e:
+        await interaction.response.send_message(f"Error fetching data from API: {e}", ephemeral=True)
 
 
-
-# Say
-@bot.tree.command(
-  name="say",
-  description="The bot won't listen unless you are cool, don't try XD")
-@app_commands.describe(
-  thing_to_say="Pray, tell me, my lord, what words should I utter?")
-async def say(interaction: discord.Interaction, thing_to_say: str):
-    # Replace "\n" with newline characters
-    thing_to_say = thing_to_say.replace("\\n", "\n")
-    
-    await interaction.channel.send(thing_to_say)
-    await interaction.response.send_message("Sent!", ephemeral=True)
-    
-    log_channel_id = 1152550043333689454
-    log_channel = bot.get_channel(log_channel_id)
-    if log_channel:
-        await log_channel.send(f"__`[{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC]`__ - **{interaction.user.name}** used </say:1080898269951049769> in <#{interaction.channel_id}>")
 
 
 
