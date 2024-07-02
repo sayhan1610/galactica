@@ -103,38 +103,6 @@ async def on_message(message):
 
     await bot.process_commands(message)
 
-# MatchMyTaste
-@bot.tree.command(name="matchmytaste", description="Find artists/tracks similar to one provided or get top tracks of the month.")
-async def matchmytaste(interaction: discord.Interaction, artist_name: str = None, track_name: str = None):
-    base_url = "https://matchmytaste.onrender.com"
-
-    if artist_name:
-        endpoint = "/search_artist"
-        query = { "query": artist_name }
-    elif track_name:
-        endpoint = "/search_track"
-        query = { "query": track_name }
-    else:
-        endpoint = "/top_tracks_of_month"
-        query = {}
-
-    response = requests.post(base_url + endpoint, json=query)
-    if response.status_code == 200:
-        data = response.json()
-        if data:
-            selected_items = random.sample(data, min(len(data), 10))
-
-            embed = discord.Embed(title="Match My Taste Results", color=0x1abc9c)  # Customize color as needed
-            for item in selected_items:
-                if "name" in item and "artists" in item and "spotify_url" in item:
-                    embed.add_field(name=item["name"], value=f"Artists: {', '.join(item['artists'])}\n[Spotify]({item['spotify_url']})", inline=False)
-
-            await interaction.response.send_message(embed=embed, ephemeral=True)
-        else:
-            await interaction.response.send_message("No results found.", ephemeral=True)
-    else:
-        await interaction.response.send_message(f"Error fetching data from API. Status code: {response.status_code}", ephemeral=True)
-
 
 # Help
 @bot.tree.command(name="help", description="List all commands and their descriptions.")
