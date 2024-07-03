@@ -219,7 +219,6 @@ async def ping(interaction: discord.Interaction):
     f"The current ping is **{latency:.2f}** ms! <:jojos_tom:1071123688201662535>")
 
 # MatchMyTaste
-bot = commands.Bot(command_prefix='/', intents=intents)
 base_url = 'https://matchmytaste.onrender.com'  # Replace with your actual API base URL
 
 # Function to search for similar artists
