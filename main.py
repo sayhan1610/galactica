@@ -214,21 +214,20 @@ async def ping(interaction: discord.Interaction):
     f"The current ping is **{latency:.2f}** ms! <:jojos_tom:1071123688201662535>")
 
 # MatchMyTaste
-
 # Replace these variables with your actual values
 BASE_URL = "https://matchmytaste.onrender.com"
-
-async def fetch_data(endpoint, data=None):
-    headers = {"accept": "application/json", "Content-Type": "application/json"}
-    if data:
-        response = requests.post(f"{BASE_URL}/{endpoint}", json=data, headers=headers)
-    else:
-        response = requests.get(f"{BASE_URL}/{endpoint}", headers=headers)
-    return response.json()
 
 @bot.tree.command(name="matchmytaste", description="Find artists/tracks similar to one provided by you or get the top 20 tracks on Spotify for this month")
 @app_commands.describe(artist="The artist name", track="The track name")
 async def matchmytaste(interaction: discord.Interaction, artist: str = None, track: str = None):
+    async def fetch_data(endpoint, data=None):
+        headers = {"accept": "application/json", "Content-Type": "application/json"}
+        if data:
+            response = requests.post(f"{BASE_URL}/{endpoint}", json=data, headers=headers)
+        else:
+            response = requests.get(f"{BASE_URL}/{endpoint}", headers=headers)
+        return response.json()
+
     try:
         if artist:
             results = await fetch_data("search_artist", {"query": artist})
@@ -255,6 +254,7 @@ async def matchmytaste(interaction: discord.Interaction, artist: str = None, tra
 
     except Exception as e:
         await interaction.response.send_message(f"An error occurred: {str(e)}", ephemeral=True)
+
 
 
 
