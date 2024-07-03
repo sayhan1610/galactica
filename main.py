@@ -214,42 +214,27 @@ async def ping(interaction: discord.Interaction):
     f"The current ping is **{latency:.2f}** ms! <:jojos_tom:1071123688201662535>")
 
 # MatchMyTaste
-import logging
-
-# Setup logging
-logging.basicConfig(level=logging.INFO)
-
-
 BASE_URL = "https://matchmytaste.onrender.com"
 
 @bot.tree.command(name="matchmytaste", description="Find artists/tracks similar to one provided by you or get the top 20 tracks on Spotify for this month")
 @app_commands.describe(artist="The artist name", track="The track name")
 async def matchmytaste(interaction: discord.Interaction, artist: str = None, track: str = None):
-    async def fetch_data(endpoint, data=None):
-        headers = {"accept": "application/json", "Content-Type": "application/json"}
-        logging.info(f"Fetching data from {endpoint} with data: {data}")
-        if data:
-            response = requests.post(f"{BASE_URL}/{endpoint}", json=data, headers=headers)
-        else:
-            response = requests.get(f"{BASE_URL}/{endpoint}", headers=headers)
-        logging.info(f"Response status: {response.status_code}")
-        logging.info(f"Response data: {response.json()}")
-        return response.json()
-
     try:
         if artist:
-            results = await fetch_data("search_artist", {"query": artist})
+            results = search_artist(artist)
             result_type = "Artists"
         elif track:
-            results = await fetch_data("search_track", {"query": track})
+            results = search_track(track)
             result_type = "Tracks"
         else:
-            results = await fetch_data("top_tracks_of_month")
+            results = top_tracks_of_month()
             result_type = "Top Tracks of the Month"
 
-        logging.info(f"Results: {results}")
+        if not results:
+            await interaction.response.send_message("No results found.", ephemeral=True)
+            return
 
-        # Randomly pick 10 results
+        # Randomly pick 10 results if more than 10 are returned
         if len(results) > 10:
             results = random.sample(results, 10)
 
@@ -258,14 +243,38 @@ async def matchmytaste(interaction: discord.Interaction, artist: str = None, tra
             if result_type == "Artists":
                 embed.add_field(name=result['name'], value=f"[Link]({result['url']})", inline=False)
             else:
-                embed.add_field(name=result['name'], value=f"{result['artists']} - [Link]({result['url']})", inline=False)
+                embed.add_field(name=result['name'], value=f"{', '.join(result['artists'])} - [Link]({result['url']})", inline=False)
 
         await interaction.response.send_message(embed=embed)
 
     except Exception as e:
-        logging.error(f"An error occurred: {str(e)}")
         await interaction.response.send_message(f"An error occurred: {str(e)}", ephemeral=True)
 
+
+def search_artist(query):
+    url = f"{BASE_URL}/search_artist"
+    payload = {"query": query}
+    headers = {"accept": "application/json", "Content-Type": "application/json"}
+
+    response = requests.post(url, json=payload, headers=headers)
+    return response.json()
+
+
+def search_track(query):
+    url = f"{BASE_URL}/search_track"
+    payload = {"query": query}
+    headers = {"accept": "application/json", "Content-Type": "application/json"}
+
+    response = requests.post(url, json=payload, headers=headers)
+    return response.json()
+
+
+def top_tracks_of_month():
+    url = f"{BASE_URL}/top_tracks_of_month"
+    headers = {"accept": "application/json"}
+
+    response = requests.get(url, headers=headers)
+    return response.json()
 
 
 
