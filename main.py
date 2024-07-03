@@ -230,11 +230,7 @@ async def matchmytaste(interaction: discord.Interaction, artist: str = None, tra
             results = top_tracks_of_month()
             result_type = "Top Tracks of the Month"
 
-        if not results:
-            await interaction.response.send_message("No results found.", ephemeral=True)
-            return
-
-        # Randomly pick 10 results if more than 10 are returned
+        # Randomly pick 10 results if there are more than 10
         if len(results) > 10:
             results = random.sample(results, 10)
 
@@ -243,13 +239,12 @@ async def matchmytaste(interaction: discord.Interaction, artist: str = None, tra
             if result_type == "Artists":
                 embed.add_field(name=result['name'], value=f"[Link]({result['url']})", inline=False)
             else:
-                embed.add_field(name=result['name'], value=f"{', '.join(result['artists'])} - [Link]({result['url']})", inline=False)
+                embed.add_field(name=result['name'], value=f"{result['artists']} - [Link]({result['url']})", inline=False)
 
         await interaction.response.send_message(embed=embed)
 
     except Exception as e:
         await interaction.response.send_message(f"An error occurred: {str(e)}", ephemeral=True)
-
 
 def search_artist(query):
     url = f"{BASE_URL}/search_artist"
@@ -259,7 +254,6 @@ def search_artist(query):
     response = requests.post(url, json=payload, headers=headers)
     return response.json()
 
-
 def search_track(query):
     url = f"{BASE_URL}/search_track"
     payload = {"query": query}
@@ -268,13 +262,13 @@ def search_track(query):
     response = requests.post(url, json=payload, headers=headers)
     return response.json()
 
-
 def top_tracks_of_month():
     url = f"{BASE_URL}/top_tracks_of_month"
     headers = {"accept": "application/json"}
 
     response = requests.get(url, headers=headers)
     return response.json()
+
 
 
 
