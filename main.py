@@ -216,7 +216,7 @@ async def ping(interaction: discord.Interaction):
 # MatchMyTaste
 BASE_URL = "https://matchmytaste.onrender.com"
 
-@bot.tree.command(name="searchartist", description="Find artists similar to the one provided.")
+@bot.tree.command(name="search artist", description="Find artists similar to the one provided.")
 @app_commands.describe(artist="The artist name")
 async def search_artist_command(interaction: discord.Interaction, artist: str):
     try:
@@ -248,7 +248,7 @@ def search_artist(query):
     return response.json()
 
 
-@bot.tree.command(name="searchtrack", description="Find tracks similar to the one provided.")
+@bot.tree.command(name="search track", description="Find tracks similar to the one provided.")
 @app_commands.describe(track="The track name")
 async def search_track_command(interaction: discord.Interaction, track: str):
     try:
@@ -280,7 +280,7 @@ def search_track(query):
     return response.json()
 
 
-@bot.tree.command(name="toptracks", description="Get the top tracks of the month.")
+@bot.tree.command(name="top tracks", description="Get the top tracks of the month.")
 async def top_tracks_command(interaction: discord.Interaction):
     try:
         results = top_tracks_of_month()
