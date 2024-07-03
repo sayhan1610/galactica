@@ -237,7 +237,7 @@ async def search_artist_command(interaction: discord.Interaction, artist: str):
         await interaction.response.send_message("The request timed out. Please try again later.", ephemeral=True)
     
     except Exception as e:
-        await interaction.response.send_message(f"An error occurred: {str(e)}", ephemeral=True)
+        await interaction.response.send_message(f"An error occurred: {str(e)}. Try again", ephemeral=True)
 
 def search_artist(query):
     url = f"{BASE_URL}/search_artist"
@@ -269,7 +269,7 @@ async def search_track_command(interaction: discord.Interaction, track: str):
         await interaction.response.send_message(embed=embed)
     
     except Exception as e:
-        await interaction.response.send_message(f"An error occurred: {str(e)}", ephemeral=True)
+        await interaction.response.send_message(f"An error occurred: {str(e)}. Try again", ephemeral=True)
 
 def search_track(query):
     url = f"{BASE_URL}/search_track"
@@ -300,7 +300,7 @@ async def top_tracks_command(interaction: discord.Interaction):
         await interaction.response.send_message(embed=embed)
     
     except Exception as e:
-        await interaction.response.send_message(f"An error occurred: {str(e)}", ephemeral=True)
+        await interaction.response.send_message(f"An error occurred: {str(e)}. Try again", ephemeral=True)
 
 def top_tracks_of_month():
     url = f"{BASE_URL}/top_tracks_of_month"
