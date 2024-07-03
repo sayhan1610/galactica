@@ -74,12 +74,7 @@ async def on_ready():
                                 name=activity_text)
     await bot.change_presence(status=discord.Status.idle, activity=activity)
     await asyncio.sleep(sleep_timer)  # sleep for x seconds
-    
-    activity_text = f"for {hours} hours and {minutes} minutes"
-    activity = discord.Activity(type=discord.ActivityType.playing,
-                                name=activity_text)
-    await bot.change_presence(status=discord.Status.idle, activity=activity)
-    await asyncio.sleep(sleep_timer)  # sleep for x seconds
+
 
 
 
