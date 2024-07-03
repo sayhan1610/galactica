@@ -216,62 +216,95 @@ async def ping(interaction: discord.Interaction):
 # MatchMyTaste
 BASE_URL = "https://matchmytaste.onrender.com"
 
-@bot.tree.command(name="matchmytaste", description="Find artists/tracks similar to one provided by you or get the top 20 tracks on Spotify for this month")
-@app_commands.describe(artist="The artist name", track="The track name")
-async def matchmytaste(interaction: discord.Interaction, artist: str = None, track: str = None):
+@bot.tree.command(name="searchartist", description="Find artists similar to the one provided.")
+@app_commands.describe(artist="The artist name")
+async def search_artist_command(interaction: discord.Interaction, artist: str):
     try:
-        if artist:
-            results = search_artist(artist)
-            result_type = "Artists"
-        elif track:
-            results = search_track(track)
-            result_type = "Tracks"
-        else:
-            results = top_tracks_of_month()
-            result_type = "Top Tracks of the Month"
-
+        results = search_artist(artist)
+        embed = discord.Embed(title=f"Artists Similar to {artist}", color=random.randint(0, 0xFFFFFF))
+        
         # Randomly pick 10 results if there are more than 10
         if len(results) > 10:
             results = random.sample(results, 10)
-
-        embed = discord.Embed(title=f"{result_type} Similar to Your Input", color=random.randint(0, 0xFFFFFF))
+        
         for result in results:
-            if result_type == "Artists":
-                embed.add_field(name=result['name'], value=f"[Link]({result['url']})", inline=False)
-            else:
-                embed.add_field(name=result['name'], value=f"{result['artists']} - [Link]({result['url']})", inline=False)
-
+            embed.add_field(name=result['name'], value=f"[Link]({result['url']})", inline=False)
+        
         await interaction.response.send_message(embed=embed)
-
+    
     except Exception as e:
         await interaction.response.send_message(f"An error occurred: {str(e)}", ephemeral=True)
 
 def search_artist(query):
     url = f"{BASE_URL}/search_artist"
-    payload = {"query": query}
-    headers = {"accept": "application/json", "Content-Type": "application/json"}
-
+    headers = {
+        "accept": "application/json",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "query": query
+    }
     response = requests.post(url, json=payload, headers=headers)
     return response.json()
+
+
+@bot.tree.command(name="searchtrack", description="Find tracks similar to the one provided.")
+@app_commands.describe(track="The track name")
+async def search_track_command(interaction: discord.Interaction, track: str):
+    try:
+        results = search_track(track)
+        embed = discord.Embed(title=f"Tracks Similar to {track}", color=random.randint(0, 0xFFFFFF))
+        
+        # Randomly pick 10 results if there are more than 10
+        if len(results) > 10:
+            results = random.sample(results, 10)
+        
+        for result in results:
+            embed.add_field(name=result['name'], value=f"{result['artists']} - [Link]({result['url']})", inline=False)
+        
+        await interaction.response.send_message(embed=embed)
+    
+    except Exception as e:
+        await interaction.response.send_message(f"An error occurred: {str(e)}", ephemeral=True)
 
 def search_track(query):
     url = f"{BASE_URL}/search_track"
-    payload = {"query": query}
-    headers = {"accept": "application/json", "Content-Type": "application/json"}
-
+    headers = {
+        "accept": "application/json",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "query": query
+    }
     response = requests.post(url, json=payload, headers=headers)
     return response.json()
 
+
+@bot.tree.command(name="toptracks", description="Get the top tracks of the month.")
+async def top_tracks_command(interaction: discord.Interaction):
+    try:
+        results = top_tracks_of_month()
+        embed = discord.Embed(title=f"Top Tracks of the Month", color=random.randint(0, 0xFFFFFF))
+        
+        # Randomly pick 10 results if there are more than 10
+        if len(results) > 10:
+            results = random.sample(results, 10)
+        
+        for result in results:
+            embed.add_field(name=result['name'], value=f"{result['artists']} - [Link]({result['url']})", inline=False)
+        
+        await interaction.response.send_message(embed=embed)
+    
+    except Exception as e:
+        await interaction.response.send_message(f"An error occurred: {str(e)}", ephemeral=True)
+
 def top_tracks_of_month():
     url = f"{BASE_URL}/top_tracks_of_month"
-    headers = {"accept": "application/json"}
-
+    headers = {
+        "accept": "application/json"
+    }
     response = requests.get(url, headers=headers)
     return response.json()
-
-
-
-
 
 
 
