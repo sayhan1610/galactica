@@ -214,73 +214,49 @@ async def ping(interaction: discord.Interaction):
     f"The current ping is **{latency:.2f}** ms! <:jojos_tom:1071123688201662535>")
 
 # MatchMyTaste
-base_url = 'https://matchmytaste.onrender.com'  # Replace with your actual API base URL
 
-# Function to search for similar artists
-def search_artist(query):
-    endpoint = '/search_artist'
-    url = base_url + endpoint
-    payload = {'query': query}
-    try:
-        response = requests.post(url, json=payload, headers={'accept': 'application/json', 'Content-Type': 'application/json'})
-        response.raise_for_status()  # Raise an error for bad responses (e.g., 404)
-        return response.json()
-    except requests.RequestException as e:
-        print(f"Error searching artist: {e}")
-        return None
+# Replace these variables with your actual values
+BASE_URL = "https://matchmytaste.onrender.com"
 
-# Function to search for similar tracks
-def search_track(query):
-    endpoint = '/search_track'
-    url = base_url + endpoint
-    payload = {'query': query}
-    try:
-        response = requests.post(url, json=payload, headers={'accept': 'application/json', 'Content-Type': 'application/json'})
-        response.raise_for_status()
-        return response.json()
-    except requests.RequestException as e:
-        print(f"Error searching track: {e}")
-        return None
-
-# Function to fetch top tracks of the month
-def top_tracks_of_month():
-    endpoint = '/top_tracks_of_month'
-    url = base_url + endpoint
-    try:
-        response = requests.get(url, headers={'accept': 'application/json'})
-        response.raise_for_status()
-        return response.json()
-    except requests.RequestException as e:
-        print(f"Error fetching top tracks of the month: {e}")
-        return None
-
-# MatchMyTaste command
-@bot.tree.command(name="matchmytaste", description="Find artists/tracks similar to one provided or get top tracks of the month.")
-async def matchmytaste(interaction: discord.Interaction, artist_name: str = None, track_name: str = None):
-    await interaction.response.defer(ephemeral=True)  # Defer the response to give more time for processing
-    if artist_name:
-        results = search_artist(artist_name)
-    elif track_name:
-        results = search_track(track_name)
+async def fetch_data(endpoint, data=None):
+    headers = {"accept": "application/json", "Content-Type": "application/json"}
+    if data:
+        response = requests.post(f"{BASE_URL}/{endpoint}", json=data, headers=headers)
     else:
-        results = top_tracks_of_month()
+        response = requests.get(f"{BASE_URL}/{endpoint}", headers=headers)
+    return response.json()
 
-    if results is None:
-        await interaction.followup.send("Error fetching data from API.", ephemeral=True)
-        return
+@bot.tree.command(name="matchmytaste", description="Find artists/tracks similar to one provided by you or get the top 20 tracks on Spotify for this month")
+@app_commands.describe(artist="The artist name", track="The track name")
+async def matchmytaste(interaction: discord.Interaction, artist: str = None, track: str = None):
+    try:
+        if artist:
+            results = await fetch_data("search_artist", {"query": artist})
+            result_type = "Artists"
+        elif track:
+            results = await fetch_data("search_track", {"query": track})
+            result_type = "Tracks"
+        else:
+            results = await fetch_data("top_tracks_of_month")
+            result_type = "Top Tracks of the Month"
 
-    if not results:
-        await interaction.followup.send("No results found.", ephemeral=True)
-        return
+        # Randomly pick 10 results
+        if len(results) > 10:
+            results = random.sample(results, 10)
 
-    selected_items = random.sample(results, min(len(results), 10))
+        embed = discord.Embed(title=f"{result_type} Similar to Your Input", color=random.randint(0, 0xFFFFFF))
+        for result in results:
+            if result_type == "Artists":
+                embed.add_field(name=result['name'], value=f"[Link]({result['url']})", inline=False)
+            else:
+                embed.add_field(name=result['name'], value=f"{result['artists']} - [Link]({result['url']})", inline=False)
 
-    embed = discord.Embed(title="Match My Taste Results", color=0x1abc9c)  # Customize color as needed
-    for item in selected_items:
-        if "name" in item and "artists" in item and "spotify_url" in item:
-            embed.add_field(name=item["name"], value=f"Artists: {', '.join(item['artists'])}\n[Spotify]({item['spotify_url']})", inline=False)
+        await interaction.response.send_message(embed=embed)
 
-    await interaction.followup.send(embed=embed, ephemeral=True)
+    except Exception as e:
+        await interaction.response.send_message(f"An error occurred: {str(e)}", ephemeral=True)
+
+
 
 
 
