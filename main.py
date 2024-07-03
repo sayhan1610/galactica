@@ -219,7 +219,7 @@ async def ping(interaction: discord.Interaction):
     f"The current ping is **{latency:.2f}** ms! <:jojos_tom:1071123688201662535>")
 
 # MatchMyTaste
-
+bot = commands.Bot(command_prefix='/', intents=intents)
 base_url = 'https://matchmytaste.onrender.com'  # Replace with your actual API base URL
 
 # Function to search for similar artists
@@ -228,7 +228,7 @@ def search_artist(query):
     url = base_url + endpoint
     payload = {'query': query}
     try:
-        response = requests.post(url, json=payload)
+        response = requests.post(url, json=payload, headers={'accept': 'application/json', 'Content-Type': 'application/json'})
         response.raise_for_status()  # Raise an error for bad responses (e.g., 404)
         return response.json()
     except requests.RequestException as e:
@@ -241,7 +241,7 @@ def search_track(query):
     url = base_url + endpoint
     payload = {'query': query}
     try:
-        response = requests.post(url, json=payload)
+        response = requests.post(url, json=payload, headers={'accept': 'application/json', 'Content-Type': 'application/json'})
         response.raise_for_status()
         return response.json()
     except requests.RequestException as e:
@@ -253,7 +253,7 @@ def top_tracks_of_month():
     endpoint = '/top_tracks_of_month'
     url = base_url + endpoint
     try:
-        response = requests.get(url)
+        response = requests.get(url, headers={'accept': 'application/json'})
         response.raise_for_status()
         return response.json()
     except requests.RequestException as e:
@@ -263,6 +263,7 @@ def top_tracks_of_month():
 # MatchMyTaste command
 @bot.tree.command(name="matchmytaste", description="Find artists/tracks similar to one provided or get top tracks of the month.")
 async def matchmytaste(interaction: discord.Interaction, artist_name: str = None, track_name: str = None):
+    await interaction.response.defer(ephemeral=True)  # Defer the response to give more time for processing
     if artist_name:
         results = search_artist(artist_name)
     elif track_name:
@@ -271,11 +272,11 @@ async def matchmytaste(interaction: discord.Interaction, artist_name: str = None
         results = top_tracks_of_month()
 
     if results is None:
-        await interaction.response.send_message("Error fetching data from API.", ephemeral=True)
+        await interaction.followup.send("Error fetching data from API.", ephemeral=True)
         return
 
     if not results:
-        await interaction.response.send_message("No results found.", ephemeral=True)
+        await interaction.followup.send("No results found.", ephemeral=True)
         return
 
     selected_items = random.sample(results, min(len(results), 10))
@@ -285,7 +286,9 @@ async def matchmytaste(interaction: discord.Interaction, artist_name: str = None
         if "name" in item and "artists" in item and "spotify_url" in item:
             embed.add_field(name=item["name"], value=f"Artists: {', '.join(item['artists'])}\n[Spotify]({item['spotify_url']})", inline=False)
 
-    await interaction.response.send_message(embed=embed, ephemeral=True)
+    await interaction.followup.send(embed=embed, ephemeral=True)
+
+
 
 
 
