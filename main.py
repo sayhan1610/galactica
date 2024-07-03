@@ -215,6 +215,7 @@ async def ping(interaction: discord.Interaction):
 
 # MatchMyTaste
 BASE_URL = "https://matchmytaste.onrender.com"
+TIMEOUT = 30  # Timeout set to 30 seconds
 
 @bot.tree.command(name="searchartist", description="Find artists similar to the one provided.")
 @app_commands.describe(artist="The artist name")
@@ -232,6 +233,9 @@ async def search_artist_command(interaction: discord.Interaction, artist: str):
         
         await interaction.response.send_message(embed=embed)
     
+    except requests.Timeout:
+        await interaction.response.send_message("The request timed out. Please try again later.", ephemeral=True)
+    
     except Exception as e:
         await interaction.response.send_message(f"An error occurred: {str(e)}", ephemeral=True)
 
@@ -244,7 +248,7 @@ def search_artist(query):
     payload = {
         "query": query
     }
-    response = requests.post(url, json=payload, headers=headers)
+    response = requests.post(url, json=payload, headers=headers, timeout=TIMEOUT)
     return response.json()
 
 
